@@ -46,7 +46,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun WeatherSearchScreen(viewModel: WeatherViewModel) {
@@ -61,7 +60,6 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
     val imageKey = weatherImageStorage.getImageKey.collectAsState(initial = "").value
 
     val imageUrl = imageKey.ifEmpty { "https://openweathermap.org/img/w/${weatherData?.weather?.get(0)?.icon}.png" }
-
 
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(
@@ -91,10 +89,11 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
             painter = painterResource(id = R.drawable.weather_wp),
             contentDescription = "Background Image",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop // Adjust the scaling to fit or fill the screen
+            contentScale = ContentScale.Crop
         )
-
-        Column(modifier = Modifier.padding(top = 30.dp, start = 26.dp, end = 26.dp)) {
+        Column(modifier = Modifier
+            .padding(top = 30.dp, start = 26.dp, end = 26.dp)
+        ) {
 
             if (weatherData != null) {
                 Row(
