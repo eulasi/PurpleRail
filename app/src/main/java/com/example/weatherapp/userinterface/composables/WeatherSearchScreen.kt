@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,16 +37,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.core.app.ActivityCompat
 import coil.annotation.ExperimentalCoilApi
 import com.example.weatherapp.R
+import com.example.weatherapp.data.storage.CityStorage
+import com.example.weatherapp.data.storage.WeatherImageStorage
 import com.example.weatherapp.utilities.Constants
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun WeatherSearchScreen(viewModel: WeatherViewModel) {
-    var cityName by remember { mutableStateOf("") }
-    val weatherData = viewModel.weatherData.observeAsState().value
     val context = LocalContext.current
+    val cityStorage = remember { CityStorage(context) }
+    val cityNameState = cityStorage.getCityName.collectAsState(initial = "")
+    var cityName by remember { mutableStateOf(cityNameState.value) }
+
+    val weatherData = viewModel.weatherData.observeAsState().value
+
+    val weatherImageStorage = remember { WeatherImageStorage(context) }
+    val imageKey = weatherImageStorage.getImageKey.collectAsState(initial = "").value
+
+    val imageUrl = imageKey.ifEmpty { "https://openweathermap.org/img/w/${weatherData?.weather?.get(0)?.icon}.png" }
+
 
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(
@@ -88,16 +104,14 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
 
                 ) {
 
-
                     Image(
-                        painter = rememberImagePainter(
-                            "https://openweathermap.org/img/w/${weatherData.weather?.get(0)?.icon}.png"
-                        ),
+                        painter = rememberImagePainter(imageUrl),
                         contentDescription = "Weather Icon",
                         modifier = Modifier
                             .size(130.dp)
 
                     )
+
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
 
@@ -120,11 +134,25 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
                     }
                 }
             }
-
+            LaunchedEffect(weatherData?.weather?.get(0)?.icon) {
+                weatherData?.weather?.get(0)?.icon?.let { icon ->
+                    val newImageKey = "https://openweathermap.org/img/w/$icon.png"
+                    weatherImageStorage.saveImageKey(newImageKey)
+                }
+            }
+            LaunchedEffect(cityNameState.value) {
+                cityName = cityNameState.value
+            }
 
             TextField(
                 value = cityName,
-                onValueChange = { cityName = it },
+                onValueChange = {
+                    cityName = it
+                    // Save the city name asynchronously
+                    CoroutineScope(Dispatchers.IO).launch {
+                        cityStorage.saveCityName(it)
+                    }
+                },
                 label = { Text("Enter city name") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -138,6 +166,5 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
 
         }
-
     }
 }

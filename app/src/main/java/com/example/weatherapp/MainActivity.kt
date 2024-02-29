@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherapp.data.remote.WeatherApiDetails
+import com.example.weatherapp.data.storage.CityStorage
 import com.example.weatherapp.repository.WeatherRepository
 import com.example.weatherapp.userinterface.composables.AboutPageScreen
 import com.example.weatherapp.userinterface.composables.WeatherSearchScreen
@@ -51,7 +52,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val repository = WeatherRepository(WeatherApiDetails.api)
-            val viewModelFactory = WeatherViewModelFactory(repository)
+            val cityStorage = CityStorage(this)
+            val viewModelFactory = WeatherViewModelFactory(repository, cityStorage)
             Scaffold(
                 bottomBar = { BottomNavBar(navController) }
             ) { innerPadding ->

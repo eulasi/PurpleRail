@@ -5,10 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.data.response.WeatherResponse
+import com.example.weatherapp.data.storage.CityStorage
 import com.example.weatherapp.repository.WeatherRepository
 import kotlinx.coroutines.launch
 
-class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() {
+class WeatherViewModel(private val repository: WeatherRepository, private val cityStorage: CityStorage) : ViewModel() {
     private val _weatherData = MutableLiveData<WeatherResponse>()
     val weatherData: LiveData<WeatherResponse> = _weatherData
 
@@ -17,6 +18,7 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
             val data = repository.getWeatherByCityName(cityName, apiKey)
             data?.let {
                 _weatherData.postValue(it)
+                cityStorage.saveCityName(cityName)
             }
         }
     }
@@ -29,5 +31,5 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
             }
         }
     }
-
 }
+
