@@ -33,3 +33,7 @@
 ## Testing
 ### Write Unit Tests 
 * Use `JUnit` and `Mockito` to write unit tests.
+
+<img width="309" alt="PR_Permissions" src="https://github.com/eulasi/PurpleRain/assets/96310496/41a1c939-823b-4b3c-8572-e4e92c3bc2b5">
+<img width="307" alt="PR_Search" src="https://github.com/eulasi/PurpleRain/assets/96310496/83fb86a2-bc95-4ed3-ad0a-21c191f48896">
+<img width="307" alt="PR_Info" src="https://github.com/eulasi/PurpleRain/assets/96310496/c4afe4a0-f1fb-4e99-b1a7-591d16d47c36">
