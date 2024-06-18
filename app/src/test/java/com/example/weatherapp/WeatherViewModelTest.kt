@@ -27,9 +27,9 @@ class WeatherViewModelTest {
     private lateinit var cityStorage: CityStorage
     private lateinit var viewModel: WeatherViewModel
 
-    private val observer: Observer<WeatherResponse> = mockk(relaxed = true)
+    private val observer: Observer<WeatherResponse?> = mockk(relaxed = true)
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setUp() {
@@ -42,7 +42,6 @@ class WeatherViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -67,5 +66,45 @@ class WeatherViewModelTest {
         viewModel.getWeatherByCoordinates(0.0, 0.0, "Test API Key")
 
         coVerify { observer.onChanged(weatherResponse) }
+    }
+
+    @Test
+    fun `getWeatherByCityName handles null response`() = runTest {
+        coEvery { repository.getWeatherByCityName(any(), any()) } returns null
+
+        viewModel.weatherData.observeForever(observer)
+        viewModel.getWeatherByCityName("Test City", "Test API Key")
+
+        coVerify { observer.onChanged(null) }
+    }
+
+    @Test
+    fun `getWeatherByCoordinates handles null response`() = runTest {
+        coEvery { repository.getWeatherByCoordinates(any(), any(), any()) } returns null
+
+        viewModel.weatherData.observeForever(observer)
+        viewModel.getWeatherByCoordinates(0.0, 0.0, "Test API Key")
+
+        coVerify { observer.onChanged(null) }
+    }
+
+    @Test
+    fun `getWeatherByCityName handles exceptions`() = runTest {
+        coEvery { repository.getWeatherByCityName(any(), any()) } throws RuntimeException("Test exception")
+
+        viewModel.weatherData.observeForever(observer)
+        viewModel.getWeatherByCityName("Test City", "Test API Key")
+
+        coVerify { observer.onChanged(null) }
+    }
+
+    @Test
+    fun `getWeatherByCoordinates handles exceptions`() = runTest {
+        coEvery { repository.getWeatherByCoordinates(any(), any(), any()) } throws RuntimeException("Test exception")
+
+        viewModel.weatherData.observeForever(observer)
+        viewModel.getWeatherByCoordinates(0.0, 0.0, "Test API Key")
+
+        coVerify { observer.onChanged(null) }
     }
 }

@@ -11,27 +11,35 @@ import com.example.weatherapp.repository.WeatherRepository
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(private val repository: WeatherRepository, private val cityStorage: CityStorage) : ViewModel() {
-    private val _weatherData = MutableLiveData<WeatherResponse>()
-    val weatherData: LiveData<WeatherResponse> = _weatherData
+    private val _weatherData = MutableLiveData<WeatherResponse?>()
+    val weatherData: LiveData<WeatherResponse?> = _weatherData
 
     private val _location = MutableLiveData<Location?>()
     val location: LiveData<Location?> = _location
 
     fun getWeatherByCityName(cityName: String, apiKey: String) {
         viewModelScope.launch {
-            val data = repository.getWeatherByCityName(cityName, apiKey)
-            data?.let {
-                _weatherData.postValue(it)
-                cityStorage.saveCityName(cityName)
+            try {
+                val data = repository.getWeatherByCityName(cityName, apiKey)
+                _weatherData.postValue(data)
+                data?.let {
+                    cityStorage.saveCityName(cityName)
+                }
+            } catch (e: Exception) {
+                // Handle the exception
+                _weatherData.postValue(null)
             }
         }
     }
 
     fun getWeatherByCoordinates(lat: Double, lon: Double, apiKey: String) {
         viewModelScope.launch {
-            val data = repository.getWeatherByCoordinates(lat, lon, apiKey)
-            data?.let {
-                _weatherData.postValue(it)
+            try {
+                val data = repository.getWeatherByCoordinates(lat, lon, apiKey)
+                _weatherData.postValue(data)
+            } catch (e: Exception) {
+                // Handle the exception
+                _weatherData.postValue(null)
             }
         }
     }
