@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,9 +39,9 @@ import androidx.core.app.ActivityCompat
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.weatherapp.R
+import com.example.weatherapp.data.remote.WeatherApiDetails
 import com.example.weatherapp.data.storage.CityStorage
 import com.example.weatherapp.data.storage.WeatherImageStorage
-import com.example.weatherapp.mocks.MockWeatherApiService
 import com.example.weatherapp.repository.WeatherRepository
 import com.example.weatherapp.utilities.Constants
 import com.example.weatherapp.viewmodel.WeatherViewModel
@@ -63,7 +64,8 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
     val weatherImageStorage = remember { WeatherImageStorage(context) }
     val imageKey = weatherImageStorage.getImageKey.collectAsState(initial = "").value
 
-    val imageUrl = imageKey.ifEmpty { "https://openweathermap.org/img/w/${weatherData?.weather?.get(0)?.icon}.png" }
+    val imageUrl =
+        imageKey.ifEmpty { "https://openweathermap.org/img/w/${weatherData?.weather?.get(0)?.icon}.png" }
 
     LaunchedEffect(Unit) {
         if (ActivityCompat.checkSelfPermission(
@@ -95,9 +97,23 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-        Column(modifier = Modifier
-            .padding(top = 30.dp, start = 26.dp, end = 26.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 30.dp, start = 26.dp, end = 26.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            LaunchedEffect(weatherData?.weather?.get(0)?.icon) {
+                weatherData?.weather?.get(0)?.icon?.let { icon ->
+                    val newImageKey = "https://openweathermap.org/img/w/$icon.png"
+                    weatherImageStorage.saveImageKey(newImageKey)
+                }
+            }
+            LaunchedEffect(cityNameState.value) {
+                cityName = cityNameState.value
+            }
 
             if (weatherData != null) {
                 Row(
@@ -137,15 +153,8 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
                     }
                 }
             }
-            LaunchedEffect(weatherData?.weather?.get(0)?.icon) {
-                weatherData?.weather?.get(0)?.icon?.let { icon ->
-                    val newImageKey = "https://openweathermap.org/img/w/$icon.png"
-                    weatherImageStorage.saveImageKey(newImageKey)
-                }
-            }
-            LaunchedEffect(cityNameState.value) {
-                cityName = cityNameState.value
-            }
+
+            Spacer(modifier = Modifier.height(46.dp))
 
             TextField(
                 value = cityName,
@@ -161,12 +170,15 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { viewModel.getWeatherByCityName(cityName, Constants.WEATHER_API_KEY) },
+                onClick = {
+                    viewModel.getWeatherByCityName(cityName, Constants.WEATHER_API_KEY)
+
+                },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text("Search")
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
 
         }
     }
@@ -174,9 +186,8 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
 
 @Composable
 fun createPreviewWeatherViewModel(context: Context): WeatherViewModel {
-    val mockApiService = MockWeatherApiService()
-    val repository = WeatherRepository(mockApiService)
     val cityStorage = CityStorage(context)
+    val repository: WeatherRepository = WeatherRepository(WeatherApiDetails.api)
     return WeatherViewModel(repository, cityStorage)
 }
 
