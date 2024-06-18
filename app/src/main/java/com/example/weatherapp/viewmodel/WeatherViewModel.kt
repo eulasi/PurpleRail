@@ -14,6 +14,8 @@ class WeatherViewModel(private val repository: WeatherRepository, private val ci
     private val _weatherData = MutableLiveData<WeatherResponse?>()
     val weatherData: LiveData<WeatherResponse?> = _weatherData
 
+
+
     private val _location = MutableLiveData<Location?>()
     val location: LiveData<Location?> = _location
 

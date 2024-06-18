@@ -1,6 +1,7 @@
 package com.example.weatherapp.userinterface.composables
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.compose.foundation.Image
@@ -22,24 +23,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import com.example.weatherapp.viewmodel.WeatherViewModel
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import com.example.weatherapp.R
 import com.example.weatherapp.data.storage.CityStorage
 import com.example.weatherapp.data.storage.WeatherImageStorage
+import com.example.weatherapp.mocks.MockCityStorage
+import com.example.weatherapp.mocks.MockWeatherApiService
+import com.example.weatherapp.repository.WeatherRepository
 import com.example.weatherapp.utilities.Constants
+import com.example.weatherapp.viewmodel.WeatherViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
@@ -166,4 +171,20 @@ fun WeatherSearchScreen(viewModel: WeatherViewModel) {
 
         }
     }
+}
+
+@Composable
+fun createPreviewWeatherViewModel(context: Context): WeatherViewModel {
+    val mockApiService = MockWeatherApiService()
+    val repository = WeatherRepository(mockApiService)
+    val cityStorage = CityStorage(context)
+    return WeatherViewModel(repository, cityStorage)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WeatherSearchScreenPreview() {
+    val context = LocalContext.current
+    val viewModel = createPreviewWeatherViewModel(context)
+    WeatherSearchScreen(viewModel = viewModel)
 }
