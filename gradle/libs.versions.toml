@@ -1,6 +1,6 @@
 [versions]
 activityComposeVersion = "1.4.0"
-agp = "8.4.0-alpha11"
+agp = "8.4.2"
 coilCompose = "2.5.0"
 converterGson = "2.9.0"
 datastorePreferencesRxjava3 = "1.0.0"

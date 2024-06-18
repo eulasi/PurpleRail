@@ -1,5 +1,6 @@
 package com.example.weatherapp.viewmodel
 
+import android.location.Location
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,9 @@ import kotlinx.coroutines.launch
 class WeatherViewModel(private val repository: WeatherRepository, private val cityStorage: CityStorage) : ViewModel() {
     private val _weatherData = MutableLiveData<WeatherResponse>()
     val weatherData: LiveData<WeatherResponse> = _weatherData
+
+    private val _location = MutableLiveData<Location?>()
+    val location: LiveData<Location?> = _location
 
     fun getWeatherByCityName(cityName: String, apiKey: String) {
         viewModelScope.launch {
@@ -31,5 +35,8 @@ class WeatherViewModel(private val repository: WeatherRepository, private val ci
             }
         }
     }
-}
 
+    fun updateLocation(location: Location) {
+        _location.postValue(location)
+    }
+}
