@@ -2,7 +2,7 @@
 
 ## Initial Setup
 ### Configure Gradle 
-* Add necessary dependencies for `Jetpack Compose`, `Retrofit`, `Coroutines`, `UnitTesting` and `Data Storage` in the build.gradle files.
+* Add the necessary dependencies for `Jetpack Compose`, `Retrofit`, `Coroutines`, `UnitTesting` and `Data Storage` in the build.gradle files.
 
 ## App Architecture
 ### Create a Model
